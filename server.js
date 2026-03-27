@@ -7,10 +7,11 @@ app.use(cors());
 app.use(express.json());
 
 const db = mysql.createConnection({
-  host:     'localhost',
-  user:     'root',
-  password: '1Muh@mmed.',   
-  database: 'inventory_db'
+  host:     process.env.MYSQLHOST     || 'localhost',
+  user:     process.env.MYSQLUSER     || 'root',
+  password: process.env.MYSQLPASSWORD || '1Muh@mmed.',
+  database: process.env.MYSQLDATABASE || 'inventory_db',
+  port:     process.env.MYSQLPORT     || 3306,
 });
 
 db.connect(err => {
@@ -84,4 +85,4 @@ app.delete('/api/products/:id', (req, res) => {
   });
 });
 
-app.listen(3000, () => console.log('API running at http://localhost:3000'));
+app.listen(process.env.PORT || 3000, () => console.log('API running'));
