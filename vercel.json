@@ -7,6 +7,6 @@
     { "src": "/", "dest": "/inventory.html" },
     { "src": "/inventory.css", "dest": "/inventory.css" },
     { "src": "/inventory.js",  "dest": "/inventory.js"  },
-    { "src": "/(.*)",          "dest": "/index.html"    }
+    { "src": "/(.*)",          "dest": "/inventory.html"    }
   ]
 }
