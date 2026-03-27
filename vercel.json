@@ -6,6 +6,7 @@
   "routes": [
     { "src": "/", "dest": "/inventory.html" },
     { "src": "/inventory.css", "dest": "/inventory.css" },
-    { "src": "/inventory.js", "dest": "/inventory.js" }
+    { "src": "/inventory.js",  "dest": "/inventory.js"  },
+    { "src": "/(.*)",          "dest": "/index.html"    }
   ]
 }
