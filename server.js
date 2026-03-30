@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql   = require('mysql2');
 const cors    = require('cors');
+const API = 'https://dbms-production-39f0.up.railway.app/api';
 
 const app = express();
 app.use(cors());
