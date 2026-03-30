@@ -1,14 +1,7 @@
 const express = require('express');
 const mysql   = require('mysql2');
 const cors    = require('cors');
-const API = 'https://dbms-production-39f0.up.railway.app/api';
-
-const path = require('path');
-
-// Serve index.html at root
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
+const path    = require('path');
 
 const app = express();
 app.use(cors());
@@ -25,6 +18,11 @@ const db = mysql.createConnection({
 db.connect(err => {
   if (err) throw err;
   console.log('MySQL connected ✓');
+});
+
+// Serve index.html at root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // GET all products with supplier + stock (JOIN)
@@ -72,7 +70,7 @@ app.post('/api/products', (req, res) => {
   );
 });
 
-// PUT update stock (this fires your MySQL TRIGGER automatically)
+// PUT update stock
 app.put('/api/stock/:productId', (req, res) => {
   const { quantity } = req.body;
   db.query(
@@ -88,6 +86,22 @@ app.put('/api/stock/:productId', (req, res) => {
 // DELETE product
 app.delete('/api/products/:id', (req, res) => {
   db.query('DELETE FROM products WHERE product_id = ?', [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// PUT mark all alerts read
+app.put('/api/alerts/read-all', (req, res) => {
+  db.query('UPDATE stock_alerts SET is_read = TRUE', (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// DELETE all alerts
+app.delete('/api/alerts', (req, res) => {
+  db.query('DELETE FROM stock_alerts', (err) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ success: true });
   });
