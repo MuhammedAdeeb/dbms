@@ -3,6 +3,13 @@ const mysql   = require('mysql2');
 const cors    = require('cors');
 const API = 'https://dbms-production-39f0.up.railway.app/api';
 
+const path = require('path');
+
+// Serve index.html at root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 const app = express();
 app.use(cors());
 app.use(express.json());
