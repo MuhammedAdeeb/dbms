@@ -32,9 +32,8 @@
   --radius:       10px;
   --radius-lg:    16px;
   --shadow:       0 8px 32px rgba(0,0,0,.5);
-  --glow:         0 0 20px rgba(0,212,255,.15);
-  --glow-green:   0 0 20px rgba(0,230,118,.2);
-  --glow-red:     0 0 20px rgba(255,59,92,.2);
+  --sidebar-w:    260px;
+  --topbar-h:     60px;
 }
 
 /* ═══════════════════════════════════════════
@@ -50,9 +49,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ═══════════════════════════════════════════
-   ANIMATED BG GRID
-═══════════════════════════════════════════ */
 body::before {
   content: '';
   position: fixed; inset: 0; z-index: 0;
@@ -69,10 +65,7 @@ body::after {
   pointer-events: none;
 }
 
-/* ═══════════════════════════════════════════
-   SCROLLBAR
-═══════════════════════════════════════════ */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--surface); }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
@@ -81,56 +74,79 @@ body::after {
 ═══════════════════════════════════════════ */
 .app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
+/* ──── MOBILE OVERLAY ──── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 49;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(4px);
+}
+.sidebar-overlay.open { display: block; }
+
 /* ──── SIDEBAR ──── */
 .sidebar {
-  width: 260px; min-height: 100vh;
+  width: var(--sidebar-w);
+  min-height: 100vh;
   background: var(--surface);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
-  position: sticky; top: 0; height: 100vh;
+  position: fixed; top: 0; left: 0; z-index: 50;
+  height: 100vh;
   overflow: hidden;
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
 }
 .sidebar-brand {
-  padding: 28px 24px 20px;
+  padding: 24px 20px 18px;
   border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
 }
 .brand-icon {
-  width: 40px; height: 40px;
+  width: 36px; height: 36px; flex-shrink: 0;
   background: var(--accent);
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 12px;
   box-shadow: 0 0 24px rgba(0,212,255,.4);
-  font-size: 18px;
+  font-size: 16px;
 }
+.brand-text { min-width: 0; }
 .brand-name {
   font-family: var(--font-head);
-  font-weight: 800; font-size: 20px;
+  font-weight: 800; font-size: 18px;
   color: var(--accent);
   letter-spacing: 2px;
+  white-space: nowrap;
 }
 .brand-sub {
-  font-size: 10px; color: var(--muted);
+  font-size: 9px; color: var(--muted);
   letter-spacing: 1.5px; text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: 1px;
 }
+.sidebar-close {
+  display: none;
+  margin-left: auto; flex-shrink: 0;
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; font-size: 14px;
+  align-items: center; justify-content: center;
+}
+
 .nav-section {
-  padding: 16px 12px 8px;
+  padding: 14px 16px 6px;
   font-size: 9px; color: var(--muted2);
   letter-spacing: 2px; text-transform: uppercase;
   font-family: var(--font-code);
 }
 .nav-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 20px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px;
   cursor: pointer;
   border-radius: 8px;
   margin: 2px 8px;
   font-size: 13px; font-weight: 400;
   color: var(--muted);
   transition: all .2s;
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
 }
 .nav-item::before {
   content: '';
@@ -144,74 +160,105 @@ body::after {
 .nav-item:hover { color: var(--text); background: var(--surface2); }
 .nav-item.active { color: var(--accent); background: rgba(0,212,255,.08); }
 .nav-item.active::before { height: 60%; }
-.nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-label { white-space: nowrap; flex: 1; min-width: 0; }
 .nav-badge {
-  margin-left: auto;
-  background: var(--red);
-  color: #fff;
+  margin-left: auto; flex-shrink: 0;
+  background: var(--red); color: #fff;
   font-size: 10px; font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 10px;
+  padding: 2px 6px; border-radius: 10px;
   min-width: 18px; text-align: center;
 }
+
+.sidebar-scroll { overflow-y: auto; flex: 1; }
+
 .sidebar-footer {
-  margin-top: auto;
-  padding: 16px 20px;
+  padding: 14px 16px;
   border-top: 1px solid var(--border);
   font-size: 11px; color: var(--muted2);
   font-family: var(--font-code);
+  flex-shrink: 0;
 }
-.db-status {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 6px;
-}
+.db-status { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .db-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
-  animation: pulse-dot 2s infinite;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+  animation: pulse-dot 2s infinite; flex-shrink: 0;
 }
-@keyframes pulse-dot {
-  0%,100% { opacity: 1; }
-  50%      { opacity: .4; }
+@keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:.4} }
+
+/* ──── MAIN WRAPPER ──── */
+.main-wrap {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+  min-width: 0;
+}
+
+/* ──── MOBILE TOPBAR ──── */
+.mobile-topbar {
+  display: none;
+  position: sticky; top: 0; z-index: 40;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.hamburger {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.mobile-brand {
+  font-family: var(--font-head); font-weight: 800;
+  font-size: 16px; color: var(--accent); letter-spacing: 2px;
+}
+.mobile-search-btn {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
 
 /* ──── MAIN ──── */
-.main {
-  flex: 1;
-  padding: 32px 36px;
-  overflow-y: auto;
-  max-height: 100vh;
-}
+.main { flex: 1; padding: 28px 32px; overflow-y: auto; }
 
 /* ═══════════════════════════════════════════
    TOP BAR
 ═══════════════════════════════════════════ */
 .topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 32px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 .page-title {
   font-family: var(--font-head);
-  font-size: 26px; font-weight: 800;
+  font-size: 24px; font-weight: 800;
   letter-spacing: -0.5px;
 }
 .page-title span { color: var(--accent); }
-.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .search-bar {
   display: flex; align-items: center; gap: 8px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 8px 14px;
+  padding: 7px 12px;
   transition: border-color .2s;
+  flex: 1; min-width: 160px;
 }
 .search-bar:focus-within { border-color: var(--accent); }
 .search-bar input {
   background: none; border: none; outline: none;
-  color: var(--text);
-  font-family: var(--font-mono); font-size: 13px;
-  width: 220px;
+  color: var(--text); font-family: var(--font-mono);
+  font-size: 12px; width: 100%; min-width: 0;
 }
 .search-bar input::placeholder { color: var(--muted2); }
 
@@ -220,36 +267,32 @@ body::after {
 ═══════════════════════════════════════════ */
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: var(--radius);
   font-family: var(--font-mono); font-size: 12px; font-weight: 600;
   cursor: pointer; border: none;
   transition: all .2s;
-  letter-spacing: .5px;
+  letter-spacing: .5px; white-space: nowrap;
 }
 .btn-primary {
-  background: var(--accent);
-  color: var(--bg);
+  background: var(--accent); color: var(--bg);
   box-shadow: 0 0 16px rgba(0,212,255,.3);
 }
 .btn-primary:hover {
-  background: #33deff;
-  box-shadow: 0 0 24px rgba(0,212,255,.5);
+  background: #33deff; box-shadow: 0 0 24px rgba(0,212,255,.5);
   transform: translateY(-1px);
 }
 .btn-ghost {
-  background: transparent;
-  color: var(--muted);
+  background: transparent; color: var(--muted);
   border: 1px solid var(--border);
 }
 .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
 .btn-danger {
-  background: rgba(255,59,92,.15);
-  color: var(--red);
+  background: rgba(255,59,92,.15); color: var(--red);
   border: 1px solid rgba(255,59,92,.3);
 }
 .btn-danger:hover { background: rgba(255,59,92,.25); }
-.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn-sm { padding: 4px 9px; font-size: 11px; }
 
 /* ═══════════════════════════════════════════
    STAT CARDS
@@ -257,22 +300,19 @@ body::after {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: 14px;
+  margin-bottom: 24px;
 }
 .stat-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 20px 22px;
-  position: relative;
-  overflow: hidden;
+  padding: 18px 20px;
+  position: relative; overflow: hidden;
   transition: border-color .2s, transform .2s;
 }
 .stat-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 2px;
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
 }
 .stat-card.blue::before   { background: var(--accent); }
 .stat-card.green::before  { background: var(--green); }
@@ -280,24 +320,20 @@ body::after {
 .stat-card.red::before    { background: var(--red); }
 .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
 .stat-label {
-  font-size: 10px; text-transform: uppercase;
+  font-size: 9px; text-transform: uppercase;
   letter-spacing: 1.5px; color: var(--muted);
   margin-bottom: 8px; font-family: var(--font-code);
 }
 .stat-value {
   font-family: var(--font-head);
-  font-size: 36px; font-weight: 800; line-height: 1;
-  margin-bottom: 4px;
+  font-size: 32px; font-weight: 800; line-height: 1; margin-bottom: 4px;
 }
 .stat-card.blue   .stat-value { color: var(--accent); }
 .stat-card.green  .stat-value { color: var(--green); }
 .stat-card.orange .stat-value { color: var(--orange); }
 .stat-card.red    .stat-value { color: var(--red); }
-.stat-delta { font-size: 11px; color: var(--muted); }
-.stat-icon {
-  position: absolute; right: 18px; top: 18px;
-  font-size: 28px; opacity: .15;
-}
+.stat-delta { font-size: 10px; color: var(--muted); }
+.stat-icon { position: absolute; right: 16px; top: 16px; font-size: 24px; opacity: .15; }
 
 /* ═══════════════════════════════════════════
    TABLE
@@ -310,34 +346,27 @@ body::after {
 }
 .table-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
 }
-.table-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; }
+.table-title { font-family: var(--font-head); font-size: 14px; font-weight: 700; }
 .table-meta  { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.table-wrap  { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.table-wrap  { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 560px; }
 thead tr     { border-bottom: 1px solid var(--border); }
 thead th {
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 10px; text-transform: uppercase;
+  padding: 11px 14px;
+  text-align: left; font-size: 9px; text-transform: uppercase;
   letter-spacing: 1.5px; color: var(--muted);
-  font-family: var(--font-code);
-  white-space: nowrap;
+  font-family: var(--font-code); white-space: nowrap;
   background: var(--surface2);
 }
-tbody tr {
-  border-bottom: 1px solid rgba(31,45,61,.5);
-  transition: background .15s;
-}
+tbody tr { border-bottom: 1px solid rgba(31,45,61,.5); transition: background .15s; }
 tbody tr:hover    { background: var(--surface2); }
 tbody tr:last-child { border-bottom: none; }
-td {
-  padding: 12px 16px;
-  vertical-align: middle;
-  color: var(--text);
-}
+td { padding: 11px 14px; vertical-align: middle; color: var(--text); }
 .td-mono { font-family: var(--font-code); font-size: 11px; color: var(--muted); }
 .td-name { font-weight: 600; }
 
@@ -345,11 +374,11 @@ td {
    BADGES
 ═══════════════════════════════════════════ */
 .badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 8px; border-radius: 20px;
-  font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 7px; border-radius: 20px;
+  font-size: 9px; font-weight: 700;
   letter-spacing: .5px; text-transform: uppercase;
-  font-family: var(--font-code);
+  font-family: var(--font-code); white-space: nowrap;
 }
 .badge-green  { background: rgba(0,230,118,.12);  color: var(--green);  border: 1px solid rgba(0,230,118,.25); }
 .badge-orange { background: rgba(255,112,67,.12);  color: var(--orange); border: 1px solid rgba(255,112,67,.25); }
@@ -361,12 +390,8 @@ td {
 /* ═══════════════════════════════════════════
    STOCK PROGRESS BAR
 ═══════════════════════════════════════════ */
-.stock-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 130px; }
-.stock-bar-bg {
-  flex: 1; height: 4px;
-  background: var(--surface3);
-  border-radius: 4px; overflow: hidden;
-}
+.stock-bar-wrap { display: flex; align-items: center; gap: 7px; min-width: 110px; }
+.stock-bar-bg   { flex: 1; height: 4px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
 .stock-bar-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
 .stock-val { font-size: 11px; color: var(--muted); font-family: var(--font-code); white-space: nowrap; }
 
@@ -375,8 +400,8 @@ td {
 ═══════════════════════════════════════════ */
 .alert-list { display: flex; flex-direction: column; gap: 0; }
 .alert-item {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 14px 20px;
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 13px 18px;
   border-bottom: 1px solid var(--border);
   transition: background .15s;
   animation: slide-in .3s ease both;
@@ -384,20 +409,19 @@ td {
 .alert-item:hover     { background: var(--surface2); }
 .alert-item:last-child { border-bottom: none; }
 .alert-icon {
-  width: 32px; height: 32px; border-radius: 8px;
+  width: 30px; height: 30px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; flex-shrink: 0;
+  font-size: 13px; flex-shrink: 0;
 }
 .alert-icon.red    { background: rgba(255,59,92,.15); }
 .alert-icon.orange { background: rgba(255,112,67,.15); }
 .alert-icon.green  { background: rgba(0,230,118,.15); }
-.alert-body { flex: 1; }
-.alert-msg  { font-size: 12px; line-height: 1.5; }
+.alert-body { flex: 1; min-width: 0; }
+.alert-msg  { font-size: 12px; line-height: 1.5; word-break: break-word; }
 .alert-time { font-size: 10px; color: var(--muted); margin-top: 3px; font-family: var(--font-code); }
 .alert-unread {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--accent);
-  margin-top: 4px; flex-shrink: 0;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); margin-top: 4px; flex-shrink: 0;
   box-shadow: 0 0 8px var(--accent);
 }
 
@@ -417,28 +441,28 @@ td {
 }
 .sql-panel-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 18px;
+  gap: 10px;
+  padding: 10px 16px;
   background: var(--surface2);
   border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
 }
-.sql-tabs { display: flex; gap: 4px; }
+.sql-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
 .sql-tab {
-  padding: 5px 12px;
+  padding: 5px 11px;
   font-size: 11px; font-family: var(--font-code);
   color: var(--muted); cursor: pointer;
   border-radius: 6px; transition: all .15s;
 }
 .sql-tab.active { background: var(--surface3); color: var(--accent); }
 .sql-code {
-  padding: 20px;
+  padding: 18px;
   font-family: var(--font-code);
-  font-size: 12px; line-height: 1.8;
-  overflow-x: auto;
-  white-space: pre;
+  font-size: 11px; line-height: 1.8;
+  overflow-x: auto; white-space: pre;
   color: #cdd9e5;
+  -webkit-overflow-scrolling: touch;
 }
-
-/* SQL syntax highlight classes */
 .kw  { color: #569cd6; font-weight: 700; }
 .kw2 { color: #c586c0; }
 .str { color: #ce9178; }
@@ -456,6 +480,7 @@ td {
   background: rgba(0,0,0,.7);
   backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
+  padding: 16px;
   opacity: 0; pointer-events: none;
   transition: opacity .2s;
 }
@@ -464,7 +489,8 @@ td {
   background: var(--surface);
   border: 1px solid var(--border2);
   border-radius: var(--radius-lg);
-  width: 520px; max-width: 95vw;
+  width: 100%; max-width: 520px;
+  max-height: 90vh; overflow-y: auto;
   box-shadow: 0 24px 80px rgba(0,0,0,.6);
   transform: translateY(20px) scale(.97);
   transition: transform .25s;
@@ -472,33 +498,35 @@ td {
 .modal-overlay.open .modal { transform: none; }
 .modal-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 22px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--surface); z-index: 1;
 }
-.modal-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; }
+.modal-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; }
 .modal-close {
-  width: 30px; height: 30px; border-radius: 8px;
+  width: 28px; height: 28px; border-radius: 7px;
   background: var(--surface2); border: none;
-  color: var(--muted); cursor: pointer; font-size: 16px;
+  color: var(--muted); cursor: pointer; font-size: 15px;
   display: flex; align-items: center; justify-content: center;
-  transition: all .15s;
+  flex-shrink: 0;
 }
 .modal-close:hover { background: var(--surface3); color: var(--text); }
-.modal-body { padding: 22px; }
+.modal-body { padding: 20px; }
 .modal-foot {
   display: flex; justify-content: flex-end; gap: 10px;
-  padding: 16px 22px;
+  padding: 14px 20px;
   border-top: 1px solid var(--border);
+  position: sticky; bottom: 0; background: var(--surface);
 }
 
 /* ═══════════════════════════════════════════
    FORMS
 ═══════════════════════════════════════════ */
-.form-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
 .form-group.full { grid-column: 1 / -1; }
 .form-label {
-  font-size: 10px; text-transform: uppercase;
+  font-size: 9px; text-transform: uppercase;
   letter-spacing: 1.5px; color: var(--muted);
   font-family: var(--font-code);
 }
@@ -506,10 +534,10 @@ td {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 9px 12px;
-  color: var(--text);
-  font-family: var(--font-mono); font-size: 12px;
+  padding: 8px 11px;
+  color: var(--text); font-family: var(--font-mono); font-size: 12px;
   outline: none; transition: border-color .2s;
+  width: 100%;
 }
 .form-input:focus { border-color: var(--accent); }
 .form-input::placeholder { color: var(--muted2); }
@@ -519,19 +547,18 @@ select.form-input option { background: var(--surface2); }
    TOAST
 ═══════════════════════════════════════════ */
 .toast-wrap {
-  position: fixed; bottom: 24px; right: 24px;
+  position: fixed; bottom: 20px; right: 16px;
   z-index: 200; display: flex; flex-direction: column; gap: 8px;
+  max-width: calc(100vw - 32px);
 }
 .toast {
   display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  font-size: 12px;
+  padding: 10px 14px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius); font-size: 12px;
   box-shadow: var(--shadow);
   animation: toast-in .25s ease both;
-  min-width: 260px;
+  min-width: 220px; max-width: 320px;
 }
 .toast.success { border-left: 3px solid var(--green); }
 .toast.error   { border-left: 3px solid var(--red); }
@@ -544,7 +571,7 @@ select.form-input option { background: var(--surface2); }
 /* ═══════════════════════════════════════════
    TWO-COL LAYOUT
 ═══════════════════════════════════════════ */
-.two-col { display: grid; grid-template-columns: 1fr 380px; gap: 20px; margin-top: 20px; }
+.two-col { display: grid; grid-template-columns: 1fr 350px; gap: 18px; margin-top: 18px; }
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -553,41 +580,42 @@ select.form-input option { background: var(--surface2); }
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 18px;
+  padding: 13px 16px;
   border-bottom: 1px solid var(--border);
 }
-.panel-title { font-family: var(--font-head); font-size: 14px; font-weight: 700; }
+.panel-title { font-family: var(--font-head); font-size: 13px; font-weight: 700; }
 .panel-tag   {
-  font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+  font-size: 8px; text-transform: uppercase; letter-spacing: 1.5px;
   color: var(--muted2); font-family: var(--font-code);
 }
 
 /* ═══════════════════════════════════════════
    SUPPLIER CARDS
 ═══════════════════════════════════════════ */
-.supplier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.supplier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
 .supplier-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 18px;
+  padding: 16px;
   transition: border-color .2s, transform .2s;
 }
 .supplier-card:hover { border-color: var(--border2); transform: translateY(-2px); }
 .sc-avatar {
-  width: 44px; height: 44px; border-radius: 10px;
+  width: 40px; height: 40px; border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; margin-bottom: 12px;
+  font-size: 18px; margin-bottom: 10px;
   border: 1px solid var(--border);
 }
-.sc-name    { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-.sc-contact { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.sc-name    { font-family: var(--font-head); font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.sc-contact { font-size: 11px; color: var(--muted); margin-bottom: 9px; }
 .sc-meta    { display: flex; flex-direction: column; gap: 4px; }
-.sc-row     { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-.sc-row span:first-child { color: var(--muted2); width: 14px; }
+.sc-row     { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); min-width: 0; }
+.sc-row span:first-child { color: var(--muted2); width: 14px; flex-shrink: 0; }
+.sc-row-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sc-footer  {
   display: flex; align-items: center; justify-content: space-between;
-  margin-top: 14px; padding-top: 12px;
+  margin-top: 12px; padding-top: 10px;
   border-top: 1px solid var(--border);
 }
 .sc-products-count { font-size: 11px; color: var(--muted); }
@@ -612,18 +640,16 @@ select.form-input option { background: var(--surface2); }
 .fade-up:nth-child(4)       { animation-delay: .20s; }
 
 /* ═══════════════════════════════════════════
-   ALERT BANNER (low stock warning bar)
+   ALERT BANNER
 ═══════════════════════════════════════════ */
 .alert-banner {
   background: rgba(255,112,67,.06);
   border: 1px solid rgba(255,112,67,.2);
   border-radius: var(--radius);
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  font-size: 12px;
-  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; margin-bottom: 18px;
+  font-size: 12px; display: flex; align-items: flex-start; gap: 10px;
 }
-.alert-banner-icon  { font-size: 18px; }
+.alert-banner-icon  { font-size: 18px; flex-shrink: 0; }
 .alert-banner-title { font-weight: 600; color: var(--orange); }
 .alert-banner-desc  { color: var(--muted); margin-top: 2px; }
 
@@ -631,39 +657,125 @@ select.form-input option { background: var(--surface2); }
    TRIGGER INFO BOX
 ═══════════════════════════════════════════ */
 .trigger-info {
-  margin-top: 14px;
-  padding: 10px 12px;
-  background: var(--surface2);
-  border-radius: var(--radius);
-  font-size: 11px;
-  color: var(--muted);
+  margin-top: 12px; padding: 9px 11px;
+  background: var(--surface2); border-radius: var(--radius);
+  font-size: 11px; color: var(--muted);
 }
 .trigger-info code { color: var(--accent); }
 
 /* ═══════════════════════════════════════════
    PAGE SUBTITLE
 ═══════════════════════════════════════════ */
-.page-subtitle {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-.page-subtitle code {
-  font-family: var(--font-code);
-  color: var(--accent);
+.page-subtitle { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.page-subtitle code { font-family: var(--font-code); color: var(--accent); }
+
+/* ════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+════════════════════════════════════════════════════ */
+
+/* ── 1280px: 3-col stats ── */
+@media (max-width: 1280px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
-@media (max-width: 1200px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .two-col    { grid-template-columns: 1fr; }
+/* ── 1100px: collapse right panel ── */
+@media (max-width: 1100px) {
+  .two-col { grid-template-columns: 1fr; }
 }
+
+/* ── 900px: narrower sidebar ── */
+@media (max-width: 900px) {
+  :root { --sidebar-w: 220px; }
+  .main { padding: 20px 20px; }
+}
+
+/* ── 768px: mobile layout ── */
 @media (max-width: 768px) {
-  .sidebar { width: 56px; }
-  .brand-name, .brand-sub, .nav-item span:not(.nav-icon) { display: none; }
-  .main { padding: 20px 16px; }
+  :root { --sidebar-w: 260px; }
+
+  /* Sidebar becomes a drawer */
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 8px 0 40px rgba(0,0,0,.6);
+  }
+  .sidebar-close { display: flex; }
+
+  /* Main fills the whole width */
+  .main-wrap { margin-left: 0; }
+
+  /* Show mobile topbar */
+  .mobile-topbar { display: flex; }
+
+  /* Main padding */
+  .main { padding: 16px; }
+
+  /* Stats: 2-col */
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-value { font-size: 26px; }
+  .stat-icon  { font-size: 20px; right: 12px; top: 12px; }
+  .stat-card  { padding: 14px 14px; }
+
+  /* Topbar */
+  .topbar { margin-bottom: 18px; flex-direction: column; align-items: stretch; }
+  .topbar-actions { flex-direction: column; align-items: stretch; }
+  .search-bar { width: 100%; }
+  .search-bar input { width: 100%; }
+  .page-title { font-size: 20px; }
+
+  /* Table: horizontal scroll works already; ensure cell min-width */
+  table { min-width: 500px; }
+  td, th { padding: 9px 10px; }
+
+  /* Two-col stack */
+  .two-col { grid-template-columns: 1fr; gap: 14px; }
+
+  /* Supplier grid: single col on very small */
+  .supplier-grid { grid-template-columns: 1fr; }
+
+  /* Modal: full-width on mobile */
+  .modal { max-height: 95vh; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-group.full { grid-column: 1; }
+
+  /* SQL tabs: scrollable */
+  .sql-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+  .sql-tab  { flex-shrink: 0; }
+  .sql-code { font-size: 10px; padding: 14px; }
+
+  /* Toast: full-width */
+  .toast-wrap { left: 16px; right: 16px; bottom: 16px; }
+  .toast { min-width: 0; max-width: 100%; }
+}
+
+/* ── 480px: single-col stats ── */
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-value { font-size: 22px; }
+  .stat-label { font-size: 8px; }
+  .stat-delta { display: none; }
+  .stat-card  { padding: 12px; }
+  .stat-icon  { display: none; }
+
+  .page-title { font-size: 18px; }
+
+  /* Table: smaller fonts */
+  table  { font-size: 11px; }
+  td, th { padding: 8px 8px; }
+
+  /* Hide some table columns on smallest screens */
+  .col-hide-xs { display: none; }
+
+  .badge { font-size: 8px; padding: 2px 5px; }
+  .btn-sm { padding: 4px 7px; font-size: 10px; }
+}
+
+/* ── 360px: stack stats to single col ── */
+@media (max-width: 360px) {
+  .stats-grid { grid-template-columns: 1fr; }
 }
 
 </style>
@@ -672,280 +784,309 @@ select.form-input option { background: var(--surface2); }
 
 <div class="app">
 
+  <!-- ── MOBILE OVERLAY ── -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
   <!-- ─────────── SIDEBAR ─────────── -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon">📦</div>
-      <div class="brand-name">InvOSS</div>
-      <div class="brand-sub">Inventory OS</div>
+      <div class="brand-text">
+        <div class="brand-name">InvOSS</div>
+        <div class="brand-sub">Inventory OS</div>
+      </div>
+      <button class="sidebar-close" onclick="closeSidebar()">✕</button>
     </div>
 
-    <div class="nav-section">Main</div>
-    <div class="nav-item active" onclick="showPage('dashboard',this)">
-      <span class="nav-icon">🏠</span><span>Dashboard</span>
-    </div>
-    <div class="nav-item" onclick="showPage('products',this)">
-      <span class="nav-icon">📦</span><span>Products</span>
-    </div>
-    <div class="nav-item" onclick="showPage('suppliers',this)">
-      <span class="nav-icon">🏭</span><span>Suppliers</span>
-    </div>
-    <div class="nav-item" onclick="showPage('stock',this)">
-      <span class="nav-icon">📊</span><span>Stock</span>
-    </div>
+    <div class="sidebar-scroll">
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)">
+        <span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span>
+      </div>
+      <div class="nav-item" onclick="showPage('products',this)">
+        <span class="nav-icon">📦</span><span class="nav-label">Products</span>
+      </div>
+      <div class="nav-item" onclick="showPage('suppliers',this)">
+        <span class="nav-icon">🏭</span><span class="nav-label">Suppliers</span>
+      </div>
+      <div class="nav-item" onclick="showPage('stock',this)">
+        <span class="nav-icon">📊</span><span class="nav-label">Stock</span>
+      </div>
 
-    <div class="nav-section">Views &amp; Triggers</div>
-    <div class="nav-item" onclick="showPage('lowstock',this)">
-      <span class="nav-icon">⚠️</span><span>Low Stock View</span>
-      <span class="nav-badge" id="lowCountBadge">0</span>
-    </div>
-    <div class="nav-item" onclick="showPage('alerts',this)">
-      <span class="nav-icon">🔔</span><span>Alerts</span>
-      <span class="nav-badge" id="alertBadge">0</span>
-    </div>
-    <div class="nav-item" onclick="showPage('sql',this)">
-      <span class="nav-icon">🗄️</span><span>SQL Schema</span>
+      <div class="nav-section">Views &amp; Triggers</div>
+      <div class="nav-item" onclick="showPage('lowstock',this)">
+        <span class="nav-icon">⚠️</span><span class="nav-label">Low Stock View</span>
+        <span class="nav-badge" id="lowCountBadge">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('alerts',this)">
+        <span class="nav-icon">🔔</span><span class="nav-label">Alerts</span>
+        <span class="nav-badge" id="alertBadge">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('sql',this)">
+        <span class="nav-icon">🗄️</span><span class="nav-label">SQL Schema</span>
+      </div>
     </div>
 
     <div class="sidebar-footer">
       <div class="db-status"><div class="db-dot"></div>MySQL Status</div>
-      <div>inventory_db · connecting…</div>
+      <div id="dbLabel">inventory_db · connecting…</div>
     </div>
   </aside>
 
-  <!-- ─────────── MAIN ─────────── -->
-  <main class="main">
+  <!-- ─────────── MAIN WRAPPER ─────────── -->
+  <div class="main-wrap">
 
-    <!-- ════ DASHBOARD ════ -->
-    <section class="page-section active" id="page-dashboard">
-      <div class="topbar">
-        <div>
-          <div class="page-title">Dashboard <span>Overview</span></div>
-          <div class="page-subtitle">Inventory Management System · Real-time</div>
-        </div>
-        <div class="topbar-actions">
-          <div class="search-bar">
-            <span style="color:var(--muted)">🔍</span>
-            <input type="text" placeholder="Search products, SKU, supplier…" id="globalSearch"/>
+    <!-- MOBILE TOP BAR -->
+    <div class="mobile-topbar">
+      <button class="hamburger" onclick="openSidebar()" aria-label="Open menu">☰</button>
+      <div class="mobile-brand">InvOSS</div>
+      <button class="mobile-search-btn" onclick="focusSearch()" aria-label="Search">🔍</button>
+    </div>
+
+    <!-- ─────────── MAIN ─────────── -->
+    <main class="main">
+
+      <!-- ════ DASHBOARD ════ -->
+      <section class="page-section active" id="page-dashboard">
+        <div class="topbar">
+          <div>
+            <div class="page-title">Dashboard <span>Overview</span></div>
+            <div class="page-subtitle">Inventory Management System · Real-time</div>
           </div>
-          <button class="btn btn-primary" onclick="openModal('addProduct')">＋ Add Product</button>
+          <div class="topbar-actions">
+            <div class="search-bar">
+              <span style="color:var(--muted);flex-shrink:0">🔍</span>
+              <input type="text" placeholder="Search products, SKU, supplier…" id="globalSearch"/>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('addProduct')">＋ Add Product</button>
+          </div>
         </div>
-      </div>
 
-      <div class="stats-grid">
-        <div class="stat-card blue fade-up">
-          <div class="stat-icon">📦</div>
-          <div class="stat-label">Total Products</div>
-          <div class="stat-value" id="totalCount">—</div>
-          <div class="stat-delta">Across all categories</div>
+        <div class="stats-grid">
+          <div class="stat-card blue fade-up">
+            <div class="stat-icon">📦</div>
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value" id="totalCount">—</div>
+            <div class="stat-delta">Across all categories</div>
+          </div>
+          <div class="stat-card green fade-up">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">In Stock</div>
+            <div class="stat-value" id="inStockCount">—</div>
+            <div class="stat-delta">Above reorder level</div>
+          </div>
+          <div class="stat-card orange fade-up">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-label">Low Stock</div>
+            <div class="stat-value" id="lowStockCount">—</div>
+            <div class="stat-delta">Need reorder soon</div>
+          </div>
+          <div class="stat-card red fade-up">
+            <div class="stat-icon">🚫</div>
+            <div class="stat-label">Out of Stock</div>
+            <div class="stat-value" id="outStockCount">—</div>
+            <div class="stat-delta">Immediate action needed</div>
+          </div>
         </div>
-        <div class="stat-card green fade-up">
-          <div class="stat-icon">✅</div>
-          <div class="stat-label">In Stock</div>
-          <div class="stat-value" id="inStockCount">—</div>
-          <div class="stat-delta">Above reorder level</div>
-        </div>
-        <div class="stat-card orange fade-up">
-          <div class="stat-icon">⚠️</div>
-          <div class="stat-label">Low Stock</div>
-          <div class="stat-value" id="lowStockCount">—</div>
-          <div class="stat-delta">Need reorder soon</div>
-        </div>
-        <div class="stat-card red fade-up">
-          <div class="stat-icon">🚫</div>
-          <div class="stat-label">Out of Stock</div>
-          <div class="stat-value" id="outStockCount">—</div>
-          <div class="stat-delta">Immediate action needed</div>
-        </div>
-      </div>
 
-      <div class="two-col">
-        <div class="table-card fade-up">
+        <div class="two-col">
+          <div class="table-card fade-up">
+            <div class="table-header">
+              <div>
+                <div class="table-title">Product Inventory</div>
+                <div class="table-meta">JOIN: products ⟕ suppliers ⟕ stock</div>
+              </div>
+              <select class="form-input" style="font-size:11px;padding:5px 9px;width:auto;" onchange="filterCategory(this.value)">
+                <option value="">All Categories</option>
+                <option>Peripherals</option>
+                <option>Accessories</option>
+                <option>Displays</option>
+                <option>Audio</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th class="col-hide-xs">SKU</th>
+                    <th class="col-hide-xs">Category</th>
+                    <th>Supplier</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th class="col-hide-xs">Price</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="productsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel fade-up">
+            <div class="panel-head">
+              <div class="panel-title">🔔 Stock Alerts</div>
+              <div class="panel-tag">TRIGGER OUTPUT</div>
+            </div>
+            <div class="alert-list" id="alertList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ PRODUCTS ════ -->
+      <section class="page-section" id="page-products">
+        <div class="topbar">
+          <div><div class="page-title">Products <span>Catalog</span></div></div>
+          <div class="topbar-actions">
+            <button class="btn btn-primary" onclick="openModal('addProduct')">＋ Add Product</button>
+          </div>
+        </div>
+        <div class="table-card">
           <div class="table-header">
             <div>
-              <div class="table-title">Product Inventory</div>
-              <div class="table-meta">JOIN: products ⟕ suppliers ⟕ stock</div>
+              <div class="table-title">All Products</div>
+              <div class="table-meta">Full catalog — vw_supplier_products JOIN view</div>
             </div>
-            <select class="form-input" style="font-size:11px;padding:5px 10px;width:auto;" onchange="filterCategory(this.value)">
-              <option value="">All Categories</option>
-              <option>Peripherals</option>
-              <option>Accessories</option>
-              <option>Displays</option>
-              <option>Audio</option>
-            </select>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Product</th><th>SKU</th><th>Category</th>
-                  <th>Supplier</th><th>Stock</th><th>Status</th>
-                  <th>Price</th><th>Actions</th>
+                  <th>#</th><th>Product</th><th class="col-hide-xs">SKU</th>
+                  <th class="col-hide-xs">Category</th><th>Supplier</th>
+                  <th class="col-hide-xs">Price</th><th class="col-hide-xs">Reorder</th>
+                  <th>Status</th><th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="productsBody"></tbody>
+              <tbody id="productsFullBody"></tbody>
             </table>
           </div>
         </div>
+      </section>
 
-        <div class="panel fade-up">
+      <!-- ════ SUPPLIERS ════ -->
+      <section class="page-section" id="page-suppliers">
+        <div class="topbar">
+          <div><div class="page-title">Suppliers <span>Directory</span></div></div>
+          <div class="topbar-actions">
+            <button class="btn btn-primary" onclick="openModal('addSupplier')">＋ Add Supplier</button>
+          </div>
+        </div>
+        <div class="supplier-grid" id="suppliersGrid"></div>
+      </section>
+
+      <!-- ════ STOCK ════ -->
+      <section class="page-section" id="page-stock">
+        <div class="topbar">
+          <div><div class="page-title">Stock <span>Management</span></div></div>
+          <div class="topbar-actions">
+            <button class="btn btn-primary" onclick="openModal('adjustStock')">↕ Adjust Stock</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <div class="table-title">Stock Levels</div>
+              <div class="table-meta">Live quantities by warehouse location</div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product</th><th class="col-hide-xs">SKU</th>
+                  <th class="col-hide-xs">Location</th><th>Quantity</th>
+                  <th class="col-hide-xs">Reorder Lvl</th><th>Status</th>
+                  <th class="col-hide-xs">Last Restocked</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="stockBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ LOW STOCK VIEW ════ -->
+      <section class="page-section" id="page-lowstock">
+        <div class="topbar">
+          <div>
+            <div class="page-title">Low Stock <span>VIEW</span></div>
+            <div class="page-subtitle">MySQL VIEW: <code>vw_low_stock</code></div>
+          </div>
+        </div>
+        <div class="alert-banner">
+          <span class="alert-banner-icon">⚠️</span>
+          <div>
+            <div class="alert-banner-title">Low Stock Alert — VIEW Active</div>
+            <div class="alert-banner-desc">Products below their reorder threshold. Contact suppliers immediately to avoid stockouts.</div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <div class="table-title">vw_low_stock Results</div>
+              <div class="table-meta">Auto-filtered: quantity ≤ reorder_level</div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product</th><th class="col-hide-xs">SKU</th>
+                  <th class="col-hide-xs">Category</th><th>Stock</th>
+                  <th class="col-hide-xs">Reorder</th><th>Needed</th>
+                  <th>Supplier</th><th>Alert</th>
+                </tr>
+              </thead>
+              <tbody id="lowStockBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ ALERTS ════ -->
+      <section class="page-section" id="page-alerts">
+        <div class="topbar">
+          <div>
+            <div class="page-title">Stock <span>Alerts</span></div>
+            <div class="page-subtitle">TRIGGER: <code>trg_stock_after_update</code></div>
+          </div>
+          <div class="topbar-actions">
+            <button class="btn btn-ghost btn-sm" onclick="markAllRead()">✓ Mark All Read</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearAlerts()">🗑 Clear</button>
+          </div>
+        </div>
+        <div class="table-card">
           <div class="panel-head">
-            <div class="panel-title">🔔 Stock Alerts</div>
-            <div class="panel-tag">TRIGGER OUTPUT</div>
+            <div class="panel-title">Trigger-Generated Alerts</div>
+            <div class="panel-tag">MYSQL TRIGGER OUTPUT → stock_alerts TABLE</div>
           </div>
-          <div class="alert-list" id="alertList"></div>
+          <div class="alert-list" id="alertListFull"></div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ════ PRODUCTS ════ -->
-    <section class="page-section" id="page-products">
-      <div class="topbar">
-        <div><div class="page-title">Products <span>Catalog</span></div></div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary" onclick="openModal('addProduct')">＋ Add Product</button>
+      <!-- ════ SQL SCHEMA ════ -->
+      <section class="page-section" id="page-sql">
+        <div class="topbar">
+          <div><div class="page-title">SQL <span>Schema</span></div></div>
         </div>
-      </div>
-      <div class="table-card">
-        <div class="table-header">
-          <div>
-            <div class="table-title">All Products</div>
-            <div class="table-meta">Full catalog — vw_supplier_products JOIN view</div>
+        <div class="sql-panel">
+          <div class="sql-panel-header">
+            <div class="sql-tabs">
+              <div class="sql-tab active" onclick="showSqlTab('tables',this)">Tables</div>
+              <div class="sql-tab" onclick="showSqlTab('join',this)">JOIN</div>
+              <div class="sql-tab" onclick="showSqlTab('view',this)">VIEW</div>
+              <div class="sql-tab" onclick="showSqlTab('trigger',this)">TRIGGER</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="copySql()" style="flex-shrink:0">📋 Copy</button>
           </div>
+          <div class="sql-code" id="sqlDisplay"></div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th><th>Product</th><th>SKU</th><th>Category</th>
-                <th>Supplier</th><th>Unit Price</th><th>Reorder Lvl</th>
-                <th>Status</th><th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="productsFullBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ════ SUPPLIERS ════ -->
-    <section class="page-section" id="page-suppliers">
-      <div class="topbar">
-        <div><div class="page-title">Suppliers <span>Directory</span></div></div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary" onclick="openModal('addSupplier')">＋ Add Supplier</button>
-        </div>
-      </div>
-      <div class="supplier-grid" id="suppliersGrid"></div>
-    </section>
-
-    <!-- ════ STOCK ════ -->
-    <section class="page-section" id="page-stock">
-      <div class="topbar">
-        <div><div class="page-title">Stock <span>Management</span></div></div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary" onclick="openModal('adjustStock')">↕ Adjust Stock</button>
-        </div>
-      </div>
-      <div class="table-card">
-        <div class="table-header">
-          <div>
-            <div class="table-title">Stock Levels</div>
-            <div class="table-meta">Live quantities by warehouse location</div>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Product</th><th>SKU</th><th>Location</th><th>Quantity</th>
-                <th>Reorder Lvl</th><th>Status</th><th>Last Restocked</th><th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="stockBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ════ LOW STOCK VIEW ════ -->
-    <section class="page-section" id="page-lowstock">
-      <div class="topbar">
-        <div>
-          <div class="page-title">Low Stock <span>VIEW</span></div>
-          <div class="page-subtitle">MySQL VIEW: <code>vw_low_stock</code></div>
-        </div>
-      </div>
-      <div class="alert-banner">
-        <span class="alert-banner-icon">⚠️</span>
-        <div>
-          <div class="alert-banner-title">Low Stock Alert — VIEW Active</div>
-          <div class="alert-banner-desc">Products below their reorder threshold. Contact suppliers immediately to avoid stockouts.</div>
-        </div>
-      </div>
-      <div class="table-card">
-        <div class="table-header">
-          <div>
-            <div class="table-title">vw_low_stock Results</div>
-            <div class="table-meta">Auto-filtered: quantity ≤ reorder_level</div>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Product</th><th>SKU</th><th>Category</th><th>Current Stock</th>
-                <th>Reorder Lvl</th><th>Units Needed</th><th>Supplier</th><th>Alert Level</th>
-              </tr>
-            </thead>
-            <tbody id="lowStockBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ════ ALERTS ════ -->
-    <section class="page-section" id="page-alerts">
-      <div class="topbar">
-        <div>
-          <div class="page-title">Stock <span>Alerts</span></div>
-          <div class="page-subtitle">TRIGGER: <code>trg_stock_after_update</code></div>
-        </div>
-        <div class="topbar-actions">
-          <button class="btn btn-ghost btn-sm" onclick="markAllRead()">✓ Mark All Read</button>
-          <button class="btn btn-ghost btn-sm" onclick="clearAlerts()">🗑 Clear</button>
-        </div>
-      </div>
-      <div class="table-card">
-        <div class="panel-head">
-          <div class="panel-title">Trigger-Generated Alerts</div>
-          <div class="panel-tag">MYSQL TRIGGER OUTPUT → stock_alerts TABLE</div>
-        </div>
-        <div class="alert-list" id="alertListFull"></div>
-      </div>
-    </section>
-
-    <!-- ════ SQL SCHEMA ════ -->
-    <section class="page-section" id="page-sql">
-      <div class="topbar">
-        <div><div class="page-title">SQL <span>Schema</span></div></div>
-      </div>
-      <div class="sql-panel">
-        <div class="sql-panel-header">
-          <div class="sql-tabs">
-            <div class="sql-tab active" onclick="showSqlTab('tables',this)">Tables</div>
-            <div class="sql-tab" onclick="showSqlTab('join',this)">JOIN</div>
-            <div class="sql-tab" onclick="showSqlTab('view',this)">VIEW</div>
-            <div class="sql-tab" onclick="showSqlTab('trigger',this)">TRIGGER</div>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="copySql()">📋 Copy</button>
-        </div>
-        <div class="sql-code" id="sqlDisplay"></div>
-      </div>
-    </section>
-
-  </main>
-</div>
+    </main>
+  </div><!-- /main-wrap -->
+</div><!-- /app -->
 
 <!-- ─────────── MODALS ─────────── -->
 <div class="modal-overlay" id="modal-addProduct">
@@ -967,10 +1108,8 @@ select.form-input option { background: var(--surface2); }
         <div class="form-group">
           <label class="form-label">Category</label>
           <select class="form-input" id="inp-cat">
-            <option>Peripherals</option>
-            <option>Accessories</option>
-            <option>Displays</option>
-            <option>Audio</option>
+            <option>Peripherals</option><option>Accessories</option>
+            <option>Displays</option><option>Audio</option>
           </select>
         </div>
         <div class="form-group">
@@ -1075,30 +1214,43 @@ select.form-input option { background: var(--surface2); }
   </div>
 </div>
 
-<!-- ─────────── TOAST ─────────── -->
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-/* ═══════════════════════════════════════════
-   API CONFIG — point this at your Node server
-═══════════════════════════════════════════ */
+/* ══════ API CONFIG ══════ */
 const API = '/api';
 
-/* ═══════════════════════════════════════════
-   IN-MEMORY CACHE  (populated from API)
-═══════════════════════════════════════════ */
+/* ══════ CACHE ══════ */
 let suppliers = [];
-let products  = [];   // rows from vw_supplier_products (JOIN view)
-let alerts    = [];   // rows from stock_alerts table
+let products  = [];
+let alerts    = [];
 
-/* ═══════════════════════════════════════════
-   API HELPER
-═══════════════════════════════════════════ */
+/* ══════ SIDEBAR (mobile) ══════ */
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function focusSearch() {
+  const inp = document.getElementById('globalSearch');
+  if (inp) { inp.focus(); inp.scrollIntoView({ behavior: 'smooth' }); }
+}
+
+/* Close sidebar when window grows past mobile breakpoint */
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) closeSidebar();
+});
+
+/* ══════ API HELPER ══════ */
 async function apiFetch(path, opts = {}) {
   try {
     const res = await fetch(API + path, {
-      headers: { 'Content-Type': 'application/json' },
-      ...opts,
+      headers: { 'Content-Type': 'application/json' }, ...opts,
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
@@ -1108,13 +1260,11 @@ async function apiFetch(path, opts = {}) {
   }
 }
 
-/* ═══════════════════════════════════════════
-   BOOT — load everything from MySQL
-═══════════════════════════════════════════ */
+/* ══════ BOOT ══════ */
 async function loadAll() {
   setDbStatus('connecting');
   const [prods, sups, alts] = await Promise.all([
-    apiFetch('/products'),   // hits vw_supplier_products JOIN view
+    apiFetch('/products'),
     apiFetch('/suppliers'),
     apiFetch('/alerts'),
   ]);
@@ -1127,12 +1277,10 @@ async function loadAll() {
   renderAlerts('alertList');
 }
 
-/* ═══════════════════════════════════════════
-   DB STATUS INDICATOR
-═══════════════════════════════════════════ */
+/* ══════ DB STATUS ══════ */
 function setDbStatus(state) {
   const dot  = document.querySelector('.db-dot');
-  const text = document.querySelector('.sidebar-footer div:last-child');
+  const text = document.getElementById('dbLabel');
   const map = {
     connected:  { bg: 'var(--green)',  shadow: '0 0 8px var(--green)',  label: 'inventory_db · connected' },
     error:      { bg: 'var(--red)',    shadow: '0 0 8px var(--red)',    label: 'MySQL · disconnected' },
@@ -1144,10 +1292,7 @@ function setDbStatus(state) {
   text.textContent     = s.label;
 }
 
-/* ═══════════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════════ */
-// products rows from vw_supplier_products use snake_case field names
+/* ══════ HELPERS ══════ */
 function getProduct(id)  { return products.find(p => p.product_id  === id) || {}; }
 function getSupplier(id) { return suppliers.find(s => s.supplier_id === id) || {}; }
 
@@ -1156,7 +1301,6 @@ function stockStatus(qty, reorder) {
   if (qty <= reorder) return { label: 'Low Stock',    cls: 'badge-orange' };
   return                     { label: 'In Stock',     cls: 'badge-green' };
 }
-
 function stockBarColor(qty, reorder) {
   if (qty === 0)      return 'var(--red)';
   if (qty <= reorder) return 'var(--orange)';
@@ -1165,10 +1309,9 @@ function stockBarColor(qty, reorder) {
 
 function updateBadges() {
   const unread = alerts.filter(a => !a.is_read).length;
-  const low    = products.filter(p => (p.current_stock || 0) > 0 && (p.current_stock || 0) <= p.reorder_level).length;
-  const out    = products.filter(p => (p.current_stock || 0) === 0).length;
-  const inStk  = products.filter(p => (p.current_stock || 0) > p.reorder_level).length;
-
+  const low    = products.filter(p => (p.current_stock||0) > 0 && (p.current_stock||0) <= p.reorder_level).length;
+  const out    = products.filter(p => (p.current_stock||0) === 0).length;
+  const inStk  = products.filter(p => (p.current_stock||0) > p.reorder_level).length;
   document.getElementById('alertBadge').textContent    = unread;
   document.getElementById('lowCountBadge').textContent = low + out;
   document.getElementById('totalCount').textContent    = products.length;
@@ -1177,9 +1320,7 @@ function updateBadges() {
   document.getElementById('outStockCount').textContent = out;
 }
 
-/* ═══════════════════════════════════════════
-   RENDER — Dashboard product table
-═══════════════════════════════════════════ */
+/* ══════ RENDER DASHBOARD TABLE ══════ */
 function renderProducts(filter = '', catFilter = '') {
   const tbody = document.getElementById('productsBody');
   if (!tbody) return;
@@ -1187,12 +1328,12 @@ function renderProducts(filter = '', catFilter = '') {
   const filtered = products.filter(p => {
     const match    = !q || p.product_name.toLowerCase().includes(q)
                        || p.sku.toLowerCase().includes(q)
-                       || (p.supplier_name || '').toLowerCase().includes(q);
+                       || (p.supplier_name||'').toLowerCase().includes(q);
     const catMatch = !catFilter || p.category === catFilter;
     return match && catMatch;
   });
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">No products found</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted)">No products found</td></tr>`;
     return;
   }
   tbody.innerHTML = filtered.map(p => {
@@ -1203,19 +1344,19 @@ function renderProducts(filter = '', catFilter = '') {
     return `
       <tr>
         <td><div class="td-name">${p.product_name}</div></td>
-        <td><span class="td-mono">${p.sku}</span></td>
-        <td><span class="badge badge-blue">${p.category || '—'}</span></td>
-        <td style="font-size:12px;color:var(--muted)">${p.supplier_name || '—'}</td>
+        <td class="col-hide-xs"><span class="td-mono">${p.sku}</span></td>
+        <td class="col-hide-xs"><span class="badge badge-blue">${p.category||'—'}</span></td>
+        <td style="font-size:12px;color:var(--muted)">${p.supplier_name||'—'}</td>
         <td>
           <div class="stock-bar-wrap">
             <div class="stock-bar-bg">
-              <div class="stock-bar-fill" style="width:${pct}%;background:${stockBarColor(qty, reorder)}"></div>
+              <div class="stock-bar-fill" style="width:${pct}%;background:${stockBarColor(qty,reorder)}"></div>
             </div>
             <span class="stock-val">${qty}</span>
           </div>
         </td>
         <td><span class="badge ${ss.cls}"><span class="badge-dot"></span>${ss.label}</span></td>
-        <td style="font-family:var(--font-code);font-size:12px;">$${parseFloat(p.unit_price).toFixed(2)}</td>
+        <td class="col-hide-xs" style="font-family:var(--font-code);font-size:12px;">$${parseFloat(p.unit_price).toFixed(2)}</td>
         <td>
           <button class="btn btn-ghost btn-sm" onclick="editStockModal(${p.product_id})">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.product_id})">Del</button>
@@ -1224,28 +1365,22 @@ function renderProducts(filter = '', catFilter = '') {
   }).join('');
 }
 
-/* ═══════════════════════════════════════════
-   RENDER — Full products page
-═══════════════════════════════════════════ */
+/* ══════ RENDER PRODUCTS PAGE ══════ */
 function renderProductsFull() {
   const tbody = document.getElementById('productsFullBody');
   if (!tbody) return;
   tbody.innerHTML = products.map(p => {
-    const qty     = p.current_stock ?? 0;
-    const reorder = p.reorder_level ?? 10;
-    const ss      = stockStatus(qty, reorder);
+    const qty = p.current_stock ?? 0; const reorder = p.reorder_level ?? 10;
+    const ss  = stockStatus(qty, reorder);
     return `
       <tr>
         <td class="td-mono">${p.product_id}</td>
-        <td>
-          <div class="td-name">${p.product_name}</div>
-          <div style="font-size:10px;color:var(--muted)">${p.description || ''}</div>
-        </td>
-        <td class="td-mono">${p.sku}</td>
-        <td><span class="badge badge-blue">${p.category || '—'}</span></td>
-        <td style="font-size:12px;color:var(--muted)">${p.supplier_name || '—'}</td>
-        <td style="font-family:var(--font-code);font-size:12px;">$${parseFloat(p.unit_price).toFixed(2)}</td>
-        <td style="font-family:var(--font-code);font-size:12px;">${reorder}</td>
+        <td><div class="td-name">${p.product_name}</div><div style="font-size:10px;color:var(--muted)">${p.description||''}</div></td>
+        <td class="td-mono col-hide-xs">${p.sku}</td>
+        <td class="col-hide-xs"><span class="badge badge-blue">${p.category||'—'}</span></td>
+        <td style="font-size:12px;color:var(--muted)">${p.supplier_name||'—'}</td>
+        <td class="col-hide-xs" style="font-family:var(--font-code);font-size:12px;">$${parseFloat(p.unit_price).toFixed(2)}</td>
+        <td class="td-mono col-hide-xs">${reorder}</td>
         <td><span class="badge ${ss.cls}"><span class="badge-dot"></span>${ss.label}</span></td>
         <td>
           <button class="btn btn-ghost btn-sm" onclick="editStockModal(${p.product_id})">Stock</button>
@@ -1255,29 +1390,27 @@ function renderProductsFull() {
   }).join('');
 }
 
-/* ═══════════════════════════════════════════
-   RENDER — Suppliers grid
-═══════════════════════════════════════════ */
+/* ══════ RENDER SUPPLIERS ══════ */
 function renderSuppliers() {
   const grid = document.getElementById('suppliersGrid');
   if (!grid) return;
-  const flags  = { USA: '🇺🇸', UK: '🇬🇧', China: '🇨🇳', Sweden: '🇸🇪' };
-  const emojis = ['🏭', '🔧', '⚙️', '🛠️', '🏗️', '⚗️'];
+  const flags  = { USA:'🇺🇸', UK:'🇬🇧', China:'🇨🇳', Sweden:'🇸🇪' };
+  const emojis = ['🏭','🔧','⚙️','🛠️','🏗️','⚗️'];
   grid.innerHTML = suppliers.map((s, i) => {
     const count = products.filter(p => p.supplier_id === s.supplier_id).length;
     return `
       <div class="supplier-card">
         <div class="sc-avatar">${emojis[i % emojis.length]}</div>
         <div class="sc-name">${s.supplier_name}</div>
-        <div class="sc-contact">${s.contact_person || ''}</div>
+        <div class="sc-contact">${s.contact_person||''}</div>
         <div class="sc-meta">
-          <div class="sc-row"><span>✉️</span>${s.email}</div>
-          <div class="sc-row"><span>📞</span>${s.phone || '—'}</div>
-          <div class="sc-row"><span>🌍</span>${flags[s.country] || '🌐'} ${s.country || '—'}</div>
+          <div class="sc-row"><span>✉️</span><span class="sc-row-text">${s.email}</span></div>
+          <div class="sc-row"><span>📞</span><span class="sc-row-text">${s.phone||'—'}</span></div>
+          <div class="sc-row"><span>🌍</span><span class="sc-row-text">${flags[s.country]||'🌐'} ${s.country||'—'}</span></div>
         </div>
         <div class="sc-footer">
-          <div class="sc-products-count">📦 ${count} product${count !== 1 ? 's' : ''}</div>
-          <span class="badge ${s.status === 'active' ? 'badge-green' : 'badge-red'}">
+          <div class="sc-products-count">📦 ${count} product${count!==1?'s':''}</div>
+          <span class="badge ${s.status==='active'?'badge-green':'badge-red'}">
             <span class="badge-dot"></span>${s.status}
           </span>
         </div>
@@ -1285,76 +1418,67 @@ function renderSuppliers() {
   }).join('');
 }
 
-/* ═══════════════════════════════════════════
-   RENDER — Stock table
-═══════════════════════════════════════════ */
+/* ══════ RENDER STOCK ══════ */
 function renderStock() {
   const tbody = document.getElementById('stockBody');
   if (!tbody) return;
   tbody.innerHTML = products.map(p => {
-    const qty     = p.current_stock ?? 0;
-    const reorder = p.reorder_level ?? 10;
-    const ss      = stockStatus(qty, reorder);
-    const pct     = Math.min(100, (qty / (Math.max(qty, reorder) * 2 || 100)) * 100);
+    const qty = p.current_stock ?? 0; const reorder = p.reorder_level ?? 10;
+    const ss  = stockStatus(qty, reorder);
+    const pct = Math.min(100, (qty / (Math.max(qty, reorder) * 2 || 100)) * 100);
     return `
       <tr>
         <td><div class="td-name">${p.product_name}</div></td>
-        <td class="td-mono">${p.sku}</td>
-        <td style="font-size:12px;color:var(--muted)">${p.warehouse_loc || 'Main Warehouse'}</td>
+        <td class="td-mono col-hide-xs">${p.sku}</td>
+        <td class="col-hide-xs" style="font-size:12px;color:var(--muted)">${p.warehouse_loc||'Main Warehouse'}</td>
         <td>
           <div class="stock-bar-wrap">
             <div class="stock-bar-bg">
-              <div class="stock-bar-fill" style="width:${pct}%;background:${stockBarColor(qty, reorder)}"></div>
+              <div class="stock-bar-fill" style="width:${pct}%;background:${stockBarColor(qty,reorder)}"></div>
             </div>
             <span class="stock-val">${qty}</span>
           </div>
         </td>
-        <td class="td-mono">${reorder}</td>
+        <td class="td-mono col-hide-xs">${reorder}</td>
         <td><span class="badge ${ss.cls}"><span class="badge-dot"></span>${ss.label}</span></td>
-        <td class="td-mono">${p.last_restocked ? new Date(p.last_restocked).toLocaleDateString() : '—'}</td>
+        <td class="td-mono col-hide-xs">${p.last_restocked ? new Date(p.last_restocked).toLocaleDateString() : '—'}</td>
         <td><button class="btn btn-ghost btn-sm" onclick="editStockModal(${p.product_id})">Adjust</button></td>
       </tr>`;
   }).join('');
 }
 
-/* ═══════════════════════════════════════════
-   RENDER — Low stock VIEW  (fetches live from API)
-═══════════════════════════════════════════ */
+/* ══════ RENDER LOW STOCK ══════ */
 async function renderLowStock() {
   const tbody = document.getElementById('lowStockBody');
   if (!tbody) return;
   tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Loading…</td></tr>`;
-  const rows = await apiFetch('/low-stock');  // hits vw_low_stock
+  const rows = await apiFetch('/low-stock');
   if (!rows) return;
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--green)">✓ All products above reorder level</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--green)">✓ All products above reorder level</td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(r => {
-    const qty     = r.current_stock ?? 0;
-    const reorder = r.reorder_level ?? 10;
-    const level   = r.alert_level || (qty === 0 ? 'OUT_OF_STOCK' : 'LOW_STOCK');
+    const qty = r.current_stock ?? 0; const reorder = r.reorder_level ?? 10;
+    const level = r.alert_level || (qty === 0 ? 'OUT_OF_STOCK' : 'LOW_STOCK');
     return `
       <tr>
         <td><div class="td-name">${r.product_name}</div></td>
-        <td class="td-mono">${r.sku}</td>
-        <td><span class="badge badge-blue">${r.category || '—'}</span></td>
+        <td class="td-mono col-hide-xs">${r.sku}</td>
+        <td class="col-hide-xs"><span class="badge badge-blue">${r.category||'—'}</span></td>
         <td>
           <div class="stock-bar-wrap">
             <div class="stock-bar-bg">
-              <div class="stock-bar-fill" style="width:${qty === 0 ? 0 : Math.round((qty / reorder) * 80)}%;background:${stockBarColor(qty, reorder)}"></div>
+              <div class="stock-bar-fill" style="width:${qty===0?0:Math.round((qty/reorder)*80)}%;background:${stockBarColor(qty,reorder)}"></div>
             </div>
-            <span class="stock-val" style="color:${stockBarColor(qty, reorder)}">${qty}</span>
+            <span class="stock-val" style="color:${stockBarColor(qty,reorder)}">${qty}</span>
           </div>
         </td>
-        <td class="td-mono">${reorder}</td>
-        <td style="font-family:var(--font-code);font-size:12px;color:var(--red)">+${r.units_needed ?? 0}</td>
-        <td style="font-size:12px;color:var(--muted)">
-          ${r.supplier_name}<br>
-          <span style="font-size:10px;color:var(--muted2)">${r.supplier_email || ''}</span>
-        </td>
+        <td class="td-mono col-hide-xs">${reorder}</td>
+        <td style="font-family:var(--font-code);font-size:12px;color:var(--red)">+${r.units_needed??0}</td>
+        <td style="font-size:12px;color:var(--muted)">${r.supplier_name}<br><span style="font-size:10px;color:var(--muted2)">${r.supplier_email||''}</span></td>
         <td>
-          <span class="badge ${level === 'OUT_OF_STOCK' ? 'badge-red' : 'badge-orange'}">
+          <span class="badge ${level==='OUT_OF_STOCK'?'badge-red':'badge-orange'}">
             <span class="badge-dot"></span>${level}
           </span>
         </td>
@@ -1362,9 +1486,7 @@ async function renderLowStock() {
   }).join('');
 }
 
-/* ═══════════════════════════════════════════
-   RENDER — Alerts (from stock_alerts table via TRIGGER)
-═══════════════════════════════════════════ */
+/* ══════ RENDER ALERTS ══════ */
 function renderAlerts(target) {
   const el = document.getElementById(target);
   if (!el) return;
@@ -1390,14 +1512,13 @@ function renderAlerts(target) {
   }).join('');
 }
 
-/* ═══════════════════════════════════════════
-   PAGE NAVIGATION
-═══════════════════════════════════════════ */
+/* ══════ PAGE NAV ══════ */
 function showPage(name, el) {
   document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   if (el) el.classList.add('active');
+  closeSidebar();
 
   if (name === 'dashboard') { renderProducts(); renderAlerts('alertList'); }
   if (name === 'products')  { renderProductsFull(); }
@@ -1414,9 +1535,7 @@ async function loadAlerts() {
   updateBadges();
 }
 
-/* ═══════════════════════════════════════════
-   MODALS
-═══════════════════════════════════════════ */
+/* ══════ MODALS ══════ */
 function openModal(name) {
   if (name === 'addProduct' || name === 'adjustStock') {
     document.getElementById('inp-supplier').innerHTML =
@@ -1431,37 +1550,28 @@ function closeModal(name) { document.getElementById('modal-' + name).classList.r
 function editStockModal(pid) {
   const sel = document.getElementById('inp-adj-product');
   sel.innerHTML = products.map(p =>
-    `<option value="${p.product_id}" ${p.product_id === pid ? 'selected' : ''}>${p.product_name}</option>`
+    `<option value="${p.product_id}" ${p.product_id===pid?'selected':''}>${p.product_name}</option>`
   ).join('');
   openModal('adjustStock');
 }
 
-/* ═══════════════════════════════════════════
-   CRUD — wired to Node / MySQL API
-═══════════════════════════════════════════ */
+/* ══════ CRUD ══════ */
 async function addProduct() {
   const name    = document.getElementById('inp-pname').value.trim();
   const sku     = document.getElementById('inp-sku').value.trim();
   const cat     = document.getElementById('inp-cat').value;
-  const price   = parseFloat(document.getElementById('inp-price').value)   || 0;
-  const reorder = parseInt(document.getElementById('inp-reorder').value)   || 10;
-  const qty     = parseInt(document.getElementById('inp-stock').value)     || 0;
+  const price   = parseFloat(document.getElementById('inp-price').value)  || 0;
+  const reorder = parseInt(document.getElementById('inp-reorder').value)  || 10;
+  const qty     = parseInt(document.getElementById('inp-stock').value)    || 0;
   const sid     = parseInt(document.getElementById('inp-supplier').value);
   const desc    = document.getElementById('inp-desc').value.trim();
   if (!name || !sku) { toast('Product name and SKU are required', 'error'); return; }
-
   const res = await apiFetch('/products', {
     method: 'POST',
     body: JSON.stringify({ supplier_id: sid, product_name: name, sku, category: cat, unit_price: price, reorder_level: reorder, description: desc }),
   });
   if (!res) return;
-
-  // Create the stock row — this fires trg_stock_after_insert on the DB side
-  await apiFetch(`/stock/${res.product_id}`, {
-    method: 'PUT',
-    body: JSON.stringify({ quantity: qty }),
-  });
-
+  await apiFetch(`/stock/${res.product_id}`, { method: 'PUT', body: JSON.stringify({ quantity: qty }) });
   closeModal('addProduct');
   await loadAll();
   toast(`Product "${name}" added`, 'success');
@@ -1482,10 +1592,8 @@ async function addSupplier() {
   const phone   = document.getElementById('inp-sphone').value.trim();
   const country = document.getElementById('inp-scountry').value.trim();
   if (!name || !email) { toast('Name and email are required', 'error'); return; }
-
   const res = await apiFetch('/suppliers', {
-    method: 'POST',
-    body: JSON.stringify({ supplier_name: name, contact_person: contact, email, phone, country }),
+    method: 'POST', body: JSON.stringify({ supplier_name: name, contact_person: contact, email, phone, country }),
   });
   if (!res) return;
   closeModal('addSupplier');
@@ -1501,83 +1609,57 @@ async function adjustStock() {
   const qty = parseInt(document.getElementById('inp-adj-qty').value) || 0;
   const p   = getProduct(pid);
   const cur = p.current_stock ?? 0;
-
   let newQty = qty;
   if (op === 'add') newQty = Math.max(0, cur + qty);
   if (op === 'sub') newQty = Math.max(0, cur - qty);
-
-  // PUT to /stock/:id — the MySQL TRIGGER fires automatically on the DB side
-  const res = await apiFetch(`/stock/${pid}`, {
-    method: 'PUT',
-    body: JSON.stringify({ quantity: newQty }),
-  });
+  const res = await apiFetch(`/stock/${pid}`, { method: 'PUT', body: JSON.stringify({ quantity: newQty }) });
   if (!res) return;
-
   closeModal('adjustStock');
   await loadAll();
   const alertData = await apiFetch('/alerts');
   if (alertData) alerts = alertData;
-  renderAlerts('alertList');
-  renderAlerts('alertListFull');
-  updateBadges();
+  renderAlerts('alertList'); renderAlerts('alertListFull'); updateBadges();
   toast(`Stock updated: ${p.product_name} → ${newQty} units`, 'success');
 }
 
-/* ═══════════════════════════════════════════
-   ALERT ACTIONS
-═══════════════════════════════════════════ */
+/* ══════ ALERT ACTIONS ══════ */
 async function markAllRead() {
   await apiFetch('/alerts/read-all', { method: 'PUT' });
   const data = await apiFetch('/alerts');
   if (data) alerts = data;
-  renderAlerts('alertListFull');
-  updateBadges();
+  renderAlerts('alertListFull'); updateBadges();
   toast('All alerts marked as read', 'info');
 }
-
 async function clearAlerts() {
   await apiFetch('/alerts', { method: 'DELETE' });
   alerts = [];
-  renderAlerts('alertList');
-  renderAlerts('alertListFull');
-  updateBadges();
+  renderAlerts('alertList'); renderAlerts('alertListFull'); updateBadges();
   toast('Alerts cleared', 'info');
 }
 
-/* ═══════════════════════════════════════════
-   SEARCH
-═══════════════════════════════════════════ */
+/* ══════ SEARCH ══════ */
 function filterCategory(val) { renderProducts(document.getElementById('globalSearch').value, val); }
+document.getElementById('globalSearch').addEventListener('input', e => { renderProducts(e.target.value); });
 
-document.getElementById('globalSearch').addEventListener('input', e => {
-  renderProducts(e.target.value);
-});
-
-/* ═══════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════ */
+/* ══════ TOAST ══════ */
 function toast(msg, type = 'info') {
-  const w     = document.getElementById('toastWrap');
+  const w = document.getElementById('toastWrap');
   const icons = { success: '✅', error: '❌', info: 'ℹ️' };
-  const el    = document.createElement('div');
+  const el = document.createElement('div');
   el.className = `toast ${type}`;
   el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
   w.appendChild(el);
   setTimeout(() => el.remove(), 3200);
 }
 
-/* ═══════════════════════════════════════════
-   CLOSE MODALS ON OVERLAY CLICK
-═══════════════════════════════════════════ */
+/* ══════ CLOSE MODALS ON OVERLAY ══════ */
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 
-/* ═══════════════════════════════════════════
-   SQL SCHEMA VIEWER
-═══════════════════════════════════════════ */
+/* ══════ SQL SCHEMA ══════ */
 const SQL_SNIPPETS = {
-tables: `<span class="cmt">-- ── TABLE: suppliers ───────────────────────────</span>
+tables:`<span class="cmt">-- ── TABLE: suppliers ───────────────────────────</span>
 <span class="kw">CREATE TABLE</span> <span class="tbl">suppliers</span> (
     <span class="col">supplier_id</span>    <span class="kw2">INT</span>          <span class="kw">AUTO_INCREMENT PRIMARY KEY</span>,
     <span class="col">supplier_name</span>  <span class="kw2">VARCHAR</span>(<span class="num">150</span>) <span class="kw">NOT NULL</span>,
@@ -1608,45 +1690,31 @@ tables: `<span class="cmt">-- ── TABLE: suppliers ────────�
         <span class="kw">FOREIGN KEY</span> (<span class="col">product_id</span>) <span class="kw">REFERENCES</span> <span class="tbl">products</span>(<span class="col">product_id</span>)
         <span class="kw">ON DELETE CASCADE</span>
 );`,
-
-join: `<span class="cmt">-- ── JOIN: products ⟕ suppliers ⟕ stock ─────────</span>
+join:`<span class="cmt">-- ── JOIN: products ⟕ suppliers ⟕ stock ─────────</span>
 <span class="kw">SELECT</span>
-    <span class="col">p.product_name</span>,
-    <span class="col">p.sku</span>,
-    <span class="col">p.category</span>,
-    <span class="col">s.supplier_name</span>,
-    <span class="col">s.email</span>   <span class="kw">AS</span> <span class="col">supplier_email</span>,
-    <span class="col">st.quantity</span>,
-    <span class="col">st.warehouse_loc</span>,
+    <span class="col">p.product_name</span>, <span class="col">p.sku</span>, <span class="col">p.category</span>,
+    <span class="col">s.supplier_name</span>, <span class="col">s.email</span> <span class="kw">AS</span> <span class="col">supplier_email</span>,
+    <span class="col">st.quantity</span>, <span class="col">st.warehouse_loc</span>,
     <span class="kw">CASE</span>
-        <span class="kw">WHEN</span> <span class="col">st.quantity</span> = <span class="num">0</span>
-            <span class="kw">THEN</span> <span class="str">'OUT_OF_STOCK'</span>
-        <span class="kw">WHEN</span> <span class="col">st.quantity</span> &lt;= <span class="col">p.reorder_level</span>
-            <span class="kw">THEN</span> <span class="str">'LOW_STOCK'</span>
+        <span class="kw">WHEN</span> <span class="col">st.quantity</span> = <span class="num">0</span>              <span class="kw">THEN</span> <span class="str">'OUT_OF_STOCK'</span>
+        <span class="kw">WHEN</span> <span class="col">st.quantity</span> &lt;= <span class="col">p.reorder_level</span> <span class="kw">THEN</span> <span class="str">'LOW_STOCK'</span>
         <span class="kw">ELSE</span> <span class="str">'IN_STOCK'</span>
     <span class="kw">END AS</span> <span class="col">stock_status</span>
 <span class="kw">FROM</span>      <span class="tbl">products</span>   <span class="col">p</span>
 <span class="kw">JOIN</span>      <span class="tbl">suppliers</span>  <span class="col">s</span>   <span class="kw">ON</span> <span class="col">p.supplier_id</span>  = <span class="col">s.supplier_id</span>
 <span class="kw">LEFT JOIN</span> <span class="tbl">stock</span>      <span class="col">st</span>  <span class="kw">ON</span> <span class="col">p.product_id</span>   = <span class="col">st.product_id</span>
 <span class="kw">ORDER BY</span>  <span class="col">stock_status</span>, <span class="col">p.product_name</span>;`,
-
-view: `<span class="cmt">-- ── VIEW: vw_low_stock ──────────────────────────</span>
+view:`<span class="cmt">-- ── VIEW: vw_low_stock ──────────────────────────</span>
 <span class="kw">CREATE OR REPLACE VIEW</span> <span class="tbl">vw_low_stock</span> <span class="kw">AS</span>
     <span class="kw">SELECT</span>
-        <span class="col">p.product_id</span>,
-        <span class="col">p.product_name</span>,
-        <span class="col">p.sku</span>,
-        <span class="col">p.reorder_level</span>,
-        <span class="fn">COALESCE</span>(<span class="col">st.quantity</span>, <span class="num">0</span>)              <span class="kw">AS</span> <span class="col">current_stock</span>,
-        <span class="col">p.reorder_level</span> - <span class="fn">COALESCE</span>(<span class="col">st.quantity</span>,<span class="num">0</span>)
-                                                <span class="kw">AS</span> <span class="col">units_needed</span>,
-        <span class="col">s.supplier_name</span>,
-        <span class="col">s.email</span>                               <span class="kw">AS</span> <span class="col">supplier_email</span>,
+        <span class="col">p.product_id</span>, <span class="col">p.product_name</span>, <span class="col">p.sku</span>, <span class="col">p.reorder_level</span>,
+        <span class="fn">COALESCE</span>(<span class="col">st.quantity</span>, <span class="num">0</span>)                  <span class="kw">AS</span> <span class="col">current_stock</span>,
+        <span class="col">p.reorder_level</span> - <span class="fn">COALESCE</span>(<span class="col">st.quantity</span>,<span class="num">0</span>) <span class="kw">AS</span> <span class="col">units_needed</span>,
+        <span class="col">s.supplier_name</span>, <span class="col">s.email</span>                <span class="kw">AS</span> <span class="col">supplier_email</span>,
         <span class="kw">CASE</span>
-            <span class="kw">WHEN</span> <span class="fn">COALESCE</span>(<span class="col">st.quantity</span>,<span class="num">0</span>) = <span class="num">0</span>
-                <span class="kw">THEN</span> <span class="str">'OUT_OF_STOCK'</span>
+            <span class="kw">WHEN</span> <span class="fn">COALESCE</span>(<span class="col">st.quantity</span>,<span class="num">0</span>) = <span class="num">0</span> <span class="kw">THEN</span> <span class="str">'OUT_OF_STOCK'</span>
             <span class="kw">ELSE</span> <span class="str">'LOW_STOCK'</span>
-        <span class="kw">END</span>                                   <span class="kw">AS</span> <span class="col">alert_level</span>
+        <span class="kw">END</span>                                     <span class="kw">AS</span> <span class="col">alert_level</span>
     <span class="kw">FROM</span>      <span class="tbl">products</span>   <span class="col">p</span>
     <span class="kw">JOIN</span>      <span class="tbl">suppliers</span>  <span class="col">s</span>  <span class="kw">ON</span> <span class="col">p.supplier_id</span> = <span class="col">s.supplier_id</span>
     <span class="kw">LEFT JOIN</span> <span class="tbl">stock</span>      <span class="col">st</span> <span class="kw">ON</span> <span class="col">p.product_id</span>  = <span class="col">st.product_id</span>
@@ -1656,8 +1724,7 @@ view: `<span class="cmt">-- ── VIEW: vw_low_stock ────────�
 
 <span class="cmt">-- Usage:</span>
 <span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">vw_low_stock</span>;`,
-
-trigger: `<span class="cmt">-- ── TRIGGER: After stock UPDATE ─────────────────</span>
+trigger:`<span class="cmt">-- ── TRIGGER: After stock UPDATE ─────────────────</span>
 <span class="kw">DELIMITER</span> $$
 <span class="kw">CREATE TRIGGER</span> <span class="fn">trg_stock_after_update</span>
 <span class="kw">AFTER UPDATE ON</span> <span class="tbl">stock</span>
@@ -1667,33 +1734,22 @@ trigger: `<span class="cmt">-- ── TRIGGER: After stock UPDATE ────�
     <span class="kw">SELECT</span> <span class="col">reorder_level</span> <span class="kw">INTO</span> <span class="col">v_reorder</span>
     <span class="kw">FROM</span>   <span class="tbl">products</span> <span class="kw">WHERE</span> <span class="col">product_id</span> = <span class="kw">NEW</span>.<span class="col">product_id</span>;
 
-    <span class="cmt">-- Stock dropped to zero</span>
     <span class="kw">IF</span> <span class="kw">NEW</span>.<span class="col">quantity</span> = <span class="num">0</span> <span class="kw">AND OLD</span>.<span class="col">quantity</span> &gt; <span class="num">0</span> <span class="kw">THEN</span>
         <span class="kw">INSERT INTO</span> <span class="tbl">stock_alerts</span>
             (<span class="col">product_id</span>, <span class="col">alert_type</span>, <span class="col">old_quantity</span>, <span class="col">new_quantity</span>, <span class="col">message</span>)
-        <span class="kw">VALUES</span>
-            (<span class="kw">NEW</span>.<span class="col">product_id</span>, <span class="str">'OUT_OF_STOCK'</span>,
-             <span class="kw">OLD</span>.<span class="col">quantity</span>, <span class="kw">NEW</span>.<span class="col">quantity</span>,
+        <span class="kw">VALUES</span> (<span class="kw">NEW</span>.<span class="col">product_id</span>, <span class="str">'OUT_OF_STOCK'</span>, <span class="kw">OLD</span>.<span class="col">quantity</span>, <span class="kw">NEW</span>.<span class="col">quantity</span>,
              <span class="fn">CONCAT</span>(<span class="str">'URGENT: Product '</span>, <span class="kw">NEW</span>.<span class="col">product_id</span>, <span class="str">' OUT OF STOCK'</span>));
 
-    <span class="cmt">-- Stock crossed reorder threshold</span>
-    <span class="kw">ELSEIF NEW</span>.<span class="col">quantity</span> &lt;= <span class="col">v_reorder</span>
-        <span class="kw">AND OLD</span>.<span class="col">quantity</span> &gt; <span class="col">v_reorder</span> <span class="kw">THEN</span>
+    <span class="kw">ELSEIF NEW</span>.<span class="col">quantity</span> &lt;= <span class="col">v_reorder</span> <span class="kw">AND OLD</span>.<span class="col">quantity</span> &gt; <span class="col">v_reorder</span> <span class="kw">THEN</span>
         <span class="kw">INSERT INTO</span> <span class="tbl">stock_alerts</span>
             (<span class="col">product_id</span>, <span class="col">alert_type</span>, <span class="col">old_quantity</span>, <span class="col">new_quantity</span>, <span class="col">message</span>)
-        <span class="kw">VALUES</span>
-            (<span class="kw">NEW</span>.<span class="col">product_id</span>, <span class="str">'LOW_STOCK'</span>,
-             <span class="kw">OLD</span>.<span class="col">quantity</span>, <span class="kw">NEW</span>.<span class="col">quantity</span>,
+        <span class="kw">VALUES</span> (<span class="kw">NEW</span>.<span class="col">product_id</span>, <span class="str">'LOW_STOCK'</span>, <span class="kw">OLD</span>.<span class="col">quantity</span>, <span class="kw">NEW</span>.<span class="col">quantity</span>,
              <span class="fn">CONCAT</span>(<span class="str">'WARNING: below reorder level '</span>, <span class="col">v_reorder</span>));
 
-    <span class="cmt">-- Restocked above threshold</span>
-    <span class="kw">ELSEIF NEW</span>.<span class="col">quantity</span> &gt; <span class="col">v_reorder</span>
-        <span class="kw">AND OLD</span>.<span class="col">quantity</span> &lt;= <span class="col">v_reorder</span> <span class="kw">THEN</span>
+    <span class="kw">ELSEIF NEW</span>.<span class="col">quantity</span> &gt; <span class="col">v_reorder</span> <span class="kw">AND OLD</span>.<span class="col">quantity</span> &lt;= <span class="col">v_reorder</span> <span class="kw">THEN</span>
         <span class="kw">INSERT INTO</span> <span class="tbl">stock_alerts</span>
             (<span class="col">product_id</span>, <span class="col">alert_type</span>, <span class="col">old_quantity</span>, <span class="col">new_quantity</span>, <span class="col">message</span>)
-        <span class="kw">VALUES</span>
-            (<span class="kw">NEW</span>.<span class="col">product_id</span>, <span class="str">'RESTOCKED'</span>,
-             <span class="kw">OLD</span>.<span class="col">quantity</span>, <span class="kw">NEW</span>.<span class="col">quantity</span>,
+        <span class="kw">VALUES</span> (<span class="kw">NEW</span>.<span class="col">product_id</span>, <span class="str">'RESTOCKED'</span>, <span class="kw">OLD</span>.<span class="col">quantity</span>, <span class="kw">NEW</span>.<span class="col">quantity</span>,
              <span class="fn">CONCAT</span>(<span class="str">'INFO: Restocked to '</span>, <span class="kw">NEW</span>.<span class="col">quantity</span>));
     <span class="kw">END IF</span>;
 <span class="kw">END</span>$$
@@ -1706,17 +1762,13 @@ function showSqlTab(key, el) {
   else document.querySelectorAll('.sql-tab')[0]?.classList.add('active');
   document.getElementById('sqlDisplay').innerHTML = SQL_SNIPPETS[key];
 }
-
 function copySql() {
-  const text = document.getElementById('sqlDisplay').innerText;
-  navigator.clipboard.writeText(text).then(() => toast('SQL copied to clipboard', 'info'));
+  navigator.clipboard.writeText(document.getElementById('sqlDisplay').innerText)
+    .then(() => toast('SQL copied to clipboard', 'info'));
 }
 
-/* ═══════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════ */
+/* ══════ INIT ══════ */
 loadAll();
-
 </script>
 </body>
 </html>
